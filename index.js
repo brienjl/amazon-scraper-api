@@ -1,7 +1,8 @@
 const express = require('express');
 const request = require('request-promise');
 require('dotenv').config();
-
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUI = require('swagger-ui-express');
 
 
 const app = express();
@@ -9,13 +10,39 @@ const PORT = process.env.PORT || 5000;
 const apiKey = process.env.API_KEY;
 const baseUrl = `http://api.scraperapi.com?api_key=${apiKey}&autoparse=true`;
 
+const swaggerOptions = {
+    swaggerDefinition: {
+        info: {
+            title: 'Amazon Scraper API',
+            version: '1.0.0'
+        }
+    },
+    apis: ['index.js'],
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 app.use(express.json());
 
 app.get('/', (req, res) => {
     res.send('Welcome to Amazon Products API.');
 });
 
-//GET Product Details
+/**
+ * @swagger
+ * /products/{productId}:
+ *      get:
+ *          description: Get product by productId
+ *          parameters:
+ *              - productId: productId
+ *                description: Amazon Product Id
+ *                in: formData
+ *                required: true
+ *                type: String
+ *          responses:
+ *              200:
+ *                  description: Success
+ */
 app.get('/products/:productId', async(req, res) => {
     const { productId } = req.params;
 
